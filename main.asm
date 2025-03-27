@@ -148,20 +148,29 @@ _start:
         int 0x80
 
 ; Function: display_menu
-; Displays the main menu
+; Description: Affiche le menu principal du programme à l'écran
 display_menu:
+    ; Sauvegarde le pointeur de base pour pouvoir y revenir plus tard
     push ebp
+    ; Configure un nouveau cadre de pile pour isoler l'environnement de la fonction
     mov ebp, esp
     
-    ; Display menu text
+    ; Prépare l'appel système write (code 4) pour afficher du texte
     mov eax, SYS_WRITE
+    ; Indique que nous voulons écrire sur la sortie standard (écran)
     mov ebx, STDOUT
+    ; Charge l'adresse du message du menu à afficher
     mov ecx, msg_menu
+    ; Spécifie la longueur exacte du message pour éviter d'afficher des données indésirables
     mov edx, msg_menu_len
+    ; Déclenche l'interruption pour exécuter l'appel système
     int 0x80
     
+    ; Restaure le pointeur de pile pour nettoyer les variables locales
     mov esp, ebp
+    ; Récupère l'ancien pointeur de base pour revenir au contexte de l'appelant
     pop ebp
+    ; Retourne au code appelant pour continuer l'exécution du programme
     ret
 
 ; Function: get_int_input
@@ -647,15 +656,14 @@ delete_person:
     pop ecx                    ; Restore counter
     
     ; Copy age (4 bytes)
-    mov eax, ecx               ; Current index
-    dec eax                    ; Previous index
+    mov eax, ecx               ; Current index (source)
     imul eax, PERSON_SIZE      ; Multiply by record size
     add eax, personnel         ; Add base address
     add eax, AGE_OFFSET        ; Add offset to age
-    mov edx, [eax]             ; Get age value
+    mov edx, [eax]             ; Get age value from source
     
     mov eax, ecx               ; Current index
-    dec eax                    ; Previous index
+    dec eax                    ; Previous index (destination)
     imul eax, PERSON_SIZE      ; Multiply by record size
     add eax, personnel         ; Add base address
     add eax, AGE_OFFSET        ; Add offset to age
